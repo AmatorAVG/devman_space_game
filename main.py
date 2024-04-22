@@ -4,7 +4,7 @@ import time
 import asyncio
 import curses
 
-from curses_tools import draw_frame
+from curses_tools import draw_frame, read_controls
 
 
 async def blink(canvas, row, column, symbol='*'):
@@ -60,12 +60,17 @@ async def fire(canvas, start_row, start_column, rows_speed=-0.3, columns_speed=0
 
 
 async def animate_spaceship(canvas, frame_1, frame_2):
+    start_row = 8
+    start_column = 35
     while True:
+        rows_direction, columns_direction, space_pressed = read_controls(canvas)
+        start_row += rows_direction
+        start_column += columns_direction
         for frame in (frame_1, frame_2):
-            draw_frame(canvas, 8, 35, frame)
-            for i in range(2):
+            draw_frame(canvas, start_row, start_column, frame)
+            for i in range(1):
                 await asyncio.sleep(0)
-            draw_frame(canvas, 8, 35, frame, negative=True)
+            draw_frame(canvas, start_row, start_column, frame, negative=True)
 
 
 def draw(canvas):
@@ -76,6 +81,7 @@ def draw(canvas):
         frame_2 = file.read()
 
     canvas.border()
+    canvas.nodelay(True)
     curses.curs_set(False)
 
     max_y, max_x = canvas.getmaxyx()
