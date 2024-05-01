@@ -59,13 +59,14 @@ async def fire(canvas, start_row, start_column, rows_speed=-0.3, columns_speed=0
         column += columns_speed
 
 
-async def animate_spaceship(canvas, frame_1, frame_2):
+async def animate_spaceship(canvas, frame_1, frame_2, max_row, max_column):
     start_row = 8
     start_column = 35
     while True:
         rows_direction, columns_direction, space_pressed = read_controls(canvas)
-        start_row += rows_direction
-        start_column += columns_direction
+        start_row = min(max(start_row + rows_direction, 1), max_row)
+        start_column = min(max(start_column + columns_direction, 1), max_column)
+
         for frame in (frame_1, frame_2):
             draw_frame(canvas, start_row, start_column, frame)
             for i in range(1):
@@ -88,7 +89,7 @@ def draw(canvas):
     stars_coordinates = {(random.randint(1, max_y-2), random.randint(1, max_x-2)) for _ in range(100)}
     coroutines = [blink(canvas, y, x, symbol=random.choice('+*.:')) for y, x in stars_coordinates]
     coroutines.append(fire(canvas, 20, 15, rows_speed=-0.3, columns_speed=0))
-    coroutines.append(animate_spaceship(canvas, frame_1, frame_2))
+    coroutines.append(animate_spaceship(canvas, frame_1, frame_2, max_y-10, max_x-6))
     while True:
         for coroutine in coroutines.copy():
             try:
